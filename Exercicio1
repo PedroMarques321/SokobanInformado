@@ -1,0 +1,42 @@
+def h_util(self, node):
+        """Para cada objetivo (lugar de armazenamento), calcula a distância de Manhattan à caixa mais próxima
+        que ainda não foi alocada, ignorando a existência de paredes e/ou obstáculos, e aloca essa caixa ao objetivo.
+        O valor da heurística é a soma todas estas distâncias + a distância entre o sokoban e a caixa mais longínqua
+        que ainda não está arrumada. Se estamos num estado final, devolve 0."""
+
+        clone = copy.deepcopy(node.state)
+        
+  
+        if self.goal_test(clone):
+            return 0
+
+        total_dist = 0
+        caixas_removidas = set() 
+        
+    
+        for objetivo in self.goal:
+            menor_dist = float('inf')
+            caixa_mais_proxima = None
+            
+            for caixa in clone['caixas']:
+                if caixa in caixas_removidas:
+                    continue
+                dist = manhattan(caixa, objetivo)
+                if dist < menor_dist:
+                    menor_dist = dist
+                    caixa_mais_proxima = caixa
+
+            if caixa_mais_proxima:
+                total_dist += menor_dist
+                caixas_removidas.add(caixa_mais_proxima)
+    
+
+        max_dist_sokoban = 0
+        sokoban = clone['sokoban']
+        for caixa in clone['caixas']:
+            if caixa not in self.goal:
+                dist_sokoban = manhattan(sokoban, caixa)
+                if dist_sokoban > max_dist_sokoban:
+                    max_dist_sokoban = dist_sokoban
+
+        return total_dist + max_dist_sokoban
