@@ -313,4 +313,18 @@ def IW_beam_search(problem, h):
     """IW_beam_search (Iterative Widening Beam Search) começa com beam width W=1 e aumenta W iterativamente até
     se obter uma solução. Devolve a solução, o W com que se encontrou a solução, e o número total (acumulado desde W=1)
     de nós expandidos. Assume-se que existe uma solução."""
-    pass
+
+    total_expanded_nodes = 0  # contador de nós expandidos ao longo das iterações
+    W = 1  # beam width inicial
+    
+    while True:
+        # Faz beam search com largura W
+        solution, expanded_nodes = beam_search_plus_count(problem, W, h)
+        total_expanded_nodes += expanded_nodes  # acumular nós expandidos
+        
+        # Se encontrarmos a solução, devolvemos
+        if solution is not None:
+            return solution, W, total_expanded_nodes
+        
+        # Aumenta a largura do beam
+        W += 1
