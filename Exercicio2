@@ -1,0 +1,79 @@
+from searchPlus import *
+from sokoban import *
+from ProblemaGrafoHs import *
+from heapq import heappush, heappop
+
+def beam_search_plus_count(problem, W, f):
+    """Beam Search: search the nodes with the best W scores in each depth.
+       Return the solution and how many nodes were expanded."""
+    f = memoize(f, 'f')
+    node = Node(problem.initial)
+    
+    if problem.goal_test(node.state):
+        return (node, 0)  
+
+    frontier = [(f(node), node)]  
+    explored = set()  
+    total_expanded = 0
+    
+    while frontier:
+        next_frontier = []
+        to_expand = min(W, len(frontier)) 
+
+        for _ in range(to_expand):
+            _, node = heappop(frontier)
+
+            if problem.goal_test(node.state):
+                return (node, total_expanded) 
+
+            if node.state not in explored:
+                explored.add(node.state)
+                total_expanded += 1
+                children = node.expand(problem)
+
+                for child in children:
+                    if child.state not in explored:  
+                        heappush(next_frontier, (f(child), child))
+
+       
+        if isinstance(problem, Sokoban):
+            goals = list(problem.goal)  
+            next_frontier.sort(key=lambda x: (
+                x[0],  
+                sum(manhattan(box, goal) for box, goal in zip(sorted(x[1].state['caixas']), sorted(goals)))
+            ))
+            frontier = next_frontier[:W]
+        else:
+           
+            frontier = sorted(next_frontier, key=lambda x: x[0])[:W]
+
+        if not frontier:
+            return (None, total_expanded) 
+
+    return (None, total_expanded)  
+
+
+def beam_search(problem, W, h=None):
+    """Beam graph search with f(n) = g(n)+h(n).
+    You need to specify W and the h function when you call beam_search, or
+    else in your Problem subclass."""
+    h = memoize(h or problem.h, 'h')
+    return beam_search_plus_count(problem, W, lambda n: n.path_cost + h(n))
+
+
+def IW_beam_search(problem, h):
+    """IW_beam_search (Iterative Widening Beam Search) começa com beam width W=1 e aumenta W iterativamente até
+    se obter uma solução. Devolve a solução, o W com que se encontrou a solução, e o número total (acumulado desde W=1)
+    de nós expandidos. Assume-se que existe uma solução."""
+
+    total_expanded = 0
+    W = 1
+    
+    while True:
+        result, expanded = beam_search_plus_count(problem, W, lambda n: n.path_cost + h(n))
+        total_expanded += expanded
+        
+        if result:
+            return (result, W, total_expanded) 
+        
+        W += 1  
