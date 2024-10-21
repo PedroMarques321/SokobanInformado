@@ -259,7 +259,8 @@ class Sokoban(Problem):
                     max_dist_sokoban = dist_sokoban
 
         return total_dist + max_dist_sokoban
-    
+
+
 def beam_search_plus_count(problem, W, f):
     """Beam Search: search the nodes with the best W scores in each depth.
        Return the solution and how many nodes were expanded."""
@@ -293,138 +294,35 @@ def beam_search_plus_count(problem, W, f):
                             beam.remove(incumbent)
                             beam.append(child)
 
-        # Keep only the W best nodes in the beam
-        beam.sort(key=lambda n: (f(n), hash(n.state)))  # Use hash of state string as tie-breaker
-        frontier = PriorityQueue(min, f)
-        for node in beam[:W]:
-            frontier.append(node)
-
-    return None, nodes_expanded  # No solution
-
-
-
-def beam_search(problem, W, h=None):
-    """Beam graph search with f(n) = g(n)+h(n).
-    You need to specify W and the h function when you call beam_search, or
-    else in your Problem subclass."""
-    h = memoize(h or problem.h, 'h')
-    return beam_search_plus_count(problem, W, lambda n: n.path_cost + h(n))
-
-
-def IW_beam_search(problem, h):
-    """IW_beam_search (Iterative Widening Beam Search) começa com beam width W=1 e aumenta W iterativamente até
-    se obter uma solução. Devolve a solução, o W com que se encontrou a solução, e o número total (acumulado desde W=1)
-    de nós expandidos. Assume-se que existe uma solução."""
-
-    total_expanded_nodes = 0
-    W = 1
-    
-    while True:
-        solution, expanded_nodes = beam_search(problem, W, h)
-        total_expanded_nodes += expanded_nodes
-        
-        if solution is not None:
-            return solution, W, total_expanded_nodes
-        
-        W += 1
-
-#melhores resultados que o ultimo, mas falha 1 ou mais hidden tests
-def beam_search_plus_count(problem, W, f):
-    """Beam Search: search the nodes with the best W scores in each depth.
-       Return the solution and how many nodes were expanded."""
-    node = Node(problem.initial)
-    if problem.goal_test(node.state):
-        return node, 0
-
-    frontier = PriorityQueue(min, f)
-    frontier.append(node)
-    explored = set()
-    nodes_expanded = 0
-
-    while frontier:
-        beam = []
-        for _ in range(len(frontier)):
-            if not frontier:
-                break
-            node = frontier.pop()
-            if problem.goal_test(node.state):
-                return node, nodes_expanded
-            
-            nodes_expanded += 1
-            if node.state not in explored:
-                explored.add(node.state)
-                for child in node.expand(problem):
-                    if child.state not in explored:
-                        beam.append(child)
-        
-        beam.sort(key=lambda n: (f(n), n.path_cost, n.state))  # Prefer deeper nodes when f-values are equal
-        frontier = PriorityQueue(min, f)
-        for node in beam[:W]:
-            if node.state not in explored:
-                frontier.append(node)
-
-    return None, nodes_expanded  # No solution found
-
-
-def beam_search(problem, W, h=None):
-    """Beam graph search with f(n) = g(n)+h(n).
-    You need to specify W and the h function when you call beam_search, or
-    else in your Problem subclass."""
-    h = memoize(h or problem.h, 'h')
-    return beam_search_plus_count(problem, W, lambda n: n.path_cost + h(n))
-
-
-def IW_beam_search(problem, h):
-    """IW_beam_search (Iterative Widening Beam Search) começa com beam width W=1 e aumenta W iterativamente até
-    se obter uma solução. Devolve a solução, o W com que se encontrou a solução, e o número total (acumulado desde W=1)
-    de nós expandidos. Assume-se que existe uma solução."""
-
-    total_expanded_nodes = 0
-    W = 1
-    
-    while True:
-        solution, expanded_nodes = beam_search(problem, W, h)
-        total_expanded_nodes += expanded_nodes
-        
-        if solution is not None:
-            return solution, W, total_expanded_nodes
-        
-        W += 1
-        
-        
-#este tem melhores resultados
-def beam_search_plus_count(problem, W, f):
-    node = Node(problem.initial)
-    if problem.goal_test(node.state):
-        return node, 0
-
-    frontier = PriorityQueue(min, f)
-    frontier.append(node)
-    explored = set()
-    nodes_expanded = 0
-
-    while frontier:
-        beam = []
-        for _ in range(len(frontier)):
-            if not frontier:
-                break
-            node = frontier.pop()
-            if problem.goal_test(node.state):
-                return node, nodes_expanded
-            
-            nodes_expanded += 1
-            if node.state not in explored:
-                explored.add(node.state)
-                for child in node.expand(problem):
-                    if child.state not in explored and child not in beam:
-                        beam.append(child)
-            
-        
-        # Sort by f-value, then by path_cost (prefer lower costs), then by state string
         beam.sort(key=lambda n: (f(n), n.path_cost, n.state))
-        frontier = PriorityQueue(min, f)
         for node in beam[:W]:
             if node.state not in explored:
                 frontier.append(node)
 
-    return None, nodes_expanded  # No solution found
+    return None, nodes_expanded
+
+
+def beam_search(problem, W, h=None):
+    """Beam graph search with f(n) = g(n)+h(n).
+    You need to specify W and the h function when you call beam_search, or
+    else in your Problem subclass."""
+    h = memoize(h or problem.h, 'h')
+    return beam_search_plus_count(problem, W, lambda n: n.path_cost + h(n))
+
+
+def IW_beam_search(problem, h):
+    """IW_beam_search (Iterative Widening Beam Search) começa com beam width W=1 e aumenta W iterativamente até
+    se obter uma solução. Devolve a solução, o W com que se encontrou a solução, e o número total (acumulado desde W=1)
+    de nós expandidos. Assume-se que existe uma solução."""
+
+    total_expanded_nodes = 0
+    W = 1
+    
+    while True:
+        solution, expanded_nodes = beam_search(problem, W, h)
+        total_expanded_nodes += expanded_nodes
+        
+        if solution is not None:
+            return solution, W, total_expanded_nodes
+        
+        W += 1
