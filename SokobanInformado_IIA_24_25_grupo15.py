@@ -276,8 +276,6 @@ def beam_search_plus_count(problem, W, f):
     while frontier:
         beam = []
         for _ in range(len(frontier)):
-            if not frontier:
-                break
             node = frontier.pop()
             if problem.goal_test(node.state):
                 return node, nodes_expanded
@@ -293,7 +291,7 @@ def beam_search_plus_count(problem, W, f):
                         if f(child) < f(incumbent):
                             beam.remove(incumbent)
                             beam.append(child)
-
+        #fazer sort ao contrario, pois dou pop e exploro o ultimo melhor no
         beam.sort(key=lambda n: (f(n), n.path_cost, n.state))
         for node in beam[:W]:
             if node.state not in explored:
@@ -326,3 +324,73 @@ def IW_beam_search(problem, h):
             return solution, W, total_expanded_nodes
         
         W += 1
+        
+def beam_search_plus_count(problem, W, f):
+    """Beam Search: search the nodes with the best W scores in each depth.
+       Return the solution and how many nodes were expanded."""
+    node = Node(problem.initial)
+
+    frontier = PriorityQueue(min, f)
+    frontier.append(node)
+    visited = set()
+    candidates = []
+    count = 0
+    
+    while frontier:
+        node = frontier.pop()
+        if problem.goal_test(node):
+            return node, count
+        visited.add(node)
+        candidates = node.expand(problem)
+        count += 1
+        for candidate in candidates:
+            if candidate in visited:
+                candidates.remove(candidate)
+        candidates.sort(key=lambda n: (f(n), n.path_cost, n.state))
+        candidates = candidates[:W]
+        for elem in frontier:
+            for candidate in candidates:
+                if elem > candidate:
+                    frontier.__delitem__(elem)
+        frontier.extend(candidates)
+    return None, count
+
+def beam_search_plus_count(problem, W, f):
+    """Beam Search: search the nodes with the best W scores in each depth.
+       Return the solution and how many nodes were expanded."""
+    node = Node(problem.initial)
+    if problem.goal_test(node.state):
+        return node, 0
+
+    frontier = PriorityQueue(min, f)
+    frontier.append(node)
+    explored = set()
+    nodes_expanded = 0
+
+    while frontier:
+        beam = []
+        for _ in range(len(frontier)):
+            if not frontier:
+                break
+            node = frontier.pop()
+            if problem.goal_test(node.state):
+                return node, nodes_expanded
+            
+            if node.state not in explored:
+                nodes_expanded += 1
+                explored.add(node.state)
+                for child in node.expand(problem):
+                    if child.state not in explored and child not in beam:
+                        beam.append(child)
+                    elif child in beam:
+                        incumbent = next(n for n in beam if n.state == child.state)
+                        if f(child) < f(incumbent):
+                            beam.remove(incumbent)
+                            beam.append(child)
+
+        # Keep only the W best nodes in the beam
+        beam.sort(key=lambda n: (f(n), n.path_cost, n.state))  # Use hash of state string as tie-breaker
+        for node in beam[:W]:
+            frontier.append(node)
+
+    return None, nodes_expanded  # No solution
