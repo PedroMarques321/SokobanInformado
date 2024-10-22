@@ -64,7 +64,8 @@ def IW_beam_search(problem, h):
             return solution, W, total_expanded_nodes
         
         W += 1
-        
+    
+#Deveria funcionar, refazer    
 def beam_search_plus_count(problem, W, f):
     """Beam Search: search the nodes with the best W scores in each depth.
        Return the solution and how many nodes were expanded."""
@@ -95,7 +96,6 @@ def beam_search_plus_count(problem, W, f):
         frontier.extend(candidates)
     return None, count
 
-#Deveria funcionar, refazer
 def beam_search_plus_count(problem, W, f):
     """Beam Search: search the nodes with the best W scores in each depth.
        Return the solution and how many nodes were expanded."""
