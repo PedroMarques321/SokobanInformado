@@ -340,7 +340,7 @@ def beam_search_plus_count(problem, W, f):
         node = frontier.pop()
         if problem.goal_test(node.state):
             return node, count
-        visited.add(node)
+        visited.add(node.state)
         candidates = node.expand(problem)
         count += 1
         for candidate in candidates:
@@ -351,7 +351,7 @@ def beam_search_plus_count(problem, W, f):
         for elem in frontier:
             for candidate in candidates:
                 if elem > candidate:
-                    del(frontier(elem))# Nao me recordo, verificar se e assim que se usa del de PriorityQueue
+                    del frontier[elem]# Nao me recordo, verificar se e assim que se usa del de PriorityQueue
         frontier.extend(candidates)
     return None, count
 
