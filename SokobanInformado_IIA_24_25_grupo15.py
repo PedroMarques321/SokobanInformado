@@ -1,5 +1,6 @@
 from searchPlus import *
-
+from sokoban import *
+from ProblemaGrafoHs import *
 import copy
 
 
