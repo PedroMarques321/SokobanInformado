@@ -1,7 +1,5 @@
-from searchPlus import *
-from sokoban import *
-from ProblemaGrafoHs import *
-import copy
+"""IIA Grupo 15: Pedro Marques n48674
+                 Daniel Rodrigues n56912"""
 
 def h_util(self, node):
     """Para cada objetivo (lugar de armazenamento), calcula a distância de Manhattan à caixa mais próxima
